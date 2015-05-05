@@ -17,7 +17,6 @@ int biGram(const quiz::list &list, const size_t n = 2)
 {
 	quiz::hash map;
 	double score = 1.0;
-	double k = 0;
 
 	for (size_t i = 0; i < list.size() - n + 1; i++) {
 		std::string gram;
@@ -31,8 +30,6 @@ int biGram(const quiz::list &list, const size_t n = 2)
 		} else {
 			map[gram] += 1;
 		}
-
-		k += 1;
 	}
 
 	for (quiz::hash::iterator it=map.begin(); it!=map.end(); ++it) {
@@ -42,8 +39,8 @@ int biGram(const quiz::list &list, const size_t n = 2)
 	}
 
 	std::cout << std::fixed << std::setprecision(5)
-			  << "P = " << pow(score, 1 / k) << std::endl
-			  << "k = " << k << std::endl;
+			  << "P = " << pow(score, 1.0 / (list.size() - n + 1)) << std::endl
+			  << "k = " << (list.size() - n + 1) << std::endl;
 
 	return 0;
 }
