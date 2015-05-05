@@ -2,43 +2,103 @@
 #include <fstream>
 #include <string>
 #include <list>
+#include <vector>
+#include <map>
 #include <algorithm>
+#include <cmath>
+#include <iomanip>
+
+namespace quiz {
+typedef std::vector<std::string> list;
+typedef std::map<std::string, int> hash;
+}
+
+double biGram(const size_t n, const quiz::list &list)
+{
+	quiz::hash map;
+	double score = 1.0;
+	double k = 0;
+
+	for (size_t i = 0; i < list.size() - n + 1; i++) {
+		std::string gram;
+
+		for (size_t j = 0; j < n; j++) {
+			gram += list[i+j] + ',';
+		}
+
+		if (map.end() == map.find(gram)) {
+			map[gram] = 1;
+		} else {
+			map[gram] += 1;
+		}
+
+		k += 1;
+	}
+
+	for (quiz::hash::iterator it=map.begin(); it!=map.end(); ++it) {
+		for (int i = 0; i < it->second; i++) {
+			score *= it->second;
+		}
+	}
+
+	return pow(score, 1 / k);
+}
+
+int parseFile(const char *filename, quiz::list &list)
+{
+	std::fstream file(filename, std::fstream::in);
+
+	if (NULL == filename) {
+		std::cerr << "Filename should not be NULL." << std::endl;
+		return -1;
+	}
+
+	if (not file.is_open()) {
+		std::cerr << "Bad file: " << filename << std::endl;
+		return -1;
+	}
+
+	while (!file.eof()) {
+		std::string token, result;
+
+		file >> token;
+
+		// Remove punctuations
+		std::remove_copy_if(token.begin(), token.end(),
+							std::back_inserter(result),
+							std::ptr_fun<int, int>(&std::ispunct)
+							);
+
+		// to lower-case
+		std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+
+		// filter space
+		if(result.find_first_not_of(' ') != std::string::npos) {
+			list.push_back(result);
+		}
+	}
+
+	file.close();
+
+	return 0;
+}
+
 
 int main(int argc, char *argv[])
 {
-	std::list<std::string> tokenList;
+	quiz::list list;
 
-	for (int i = 0; i < argc; i++) {
-		std::cout << argv[i] << std::endl;
+	if (2 != argc) {
+		std::cerr << "Usage: " << argv[0] << " <file_path>" << std::endl;
+		return -1;
 	}
 
-	if (2 == argc) {
-		std::fstream file(argv[1], std::fstream::in);
-
-		while (!file.eof()) {
-			std::string token, result;
-
-			file >> token;
-
-			// Remove punctuations
-			std::remove_copy_if(token.begin(), token.end(),
-								std::back_inserter(result),
-								std::ptr_fun<int, int>(&std::ispunct)
-								);
-
-			// to lower-case
-			std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-
-			// find space
-			if(result.find_first_not_of(' ') != std::string::npos) {
-				std::cout << result << ' ';
-				tokenList.push_back(result);
-			}
-		}
-
-
-		file.close();
+	if (0 < parseFile(argv[1], list)) {
+		return -1;
 	}
 
-	
+	std::cout << std::fixed << std::setprecision(5)
+			  << biGram(2, list) << std::endl;
+
+	return 0;
 }
