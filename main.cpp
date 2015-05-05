@@ -13,7 +13,7 @@ typedef std::vector<std::string> list;
 typedef std::map<std::string, int> hash;
 }
 
-double biGram(const size_t n, const quiz::list &list)
+int biGram(const quiz::list &list, const size_t n = 2)
 {
 	quiz::hash map;
 	double score = 1.0;
@@ -41,7 +41,11 @@ double biGram(const size_t n, const quiz::list &list)
 		}
 	}
 
-	return pow(score, 1 / k);
+	std::cout << std::fixed << std::setprecision(5)
+			  << "P = " << pow(score, 1 / k) << std::endl
+			  << "k = " << k << std::endl;
+
+	return 0;
 }
 
 int parseFile(const char *filename, quiz::list &list)
@@ -97,8 +101,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	std::cout << std::fixed << std::setprecision(5)
-			  << biGram(2, list) << std::endl;
+	biGram(list);
 
 	return 0;
 }
